@@ -1,17 +1,14 @@
 {
   "name": "whatsapp-bot",
   "version": "1.0.0",
-  "description": "Simple WhatsApp Bot using Baileys",
+  "description": "WhatsApp bot using Baileys",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "@adiwajshing/baileys": "^6.2.1",
+    "@whiskeysockets/baileys": "^6.7.18",
     "@hapi/boom": "^10.0.1",
-    "pino": "^8.14.1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+    "pino": "^8.0.0"
+  }
 }
