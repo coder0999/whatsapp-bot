@@ -7,8 +7,11 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "@adiwajshing/baileys": "^6.5.0",
+    "@adiwajshing/baileys": "^6.2.1",
     "@hapi/boom": "^10.0.1",
-    "pino": "^8.0.0"
-  }
+    "pino": "^8.14.1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
