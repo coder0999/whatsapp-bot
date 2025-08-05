@@ -1,29 +1,43 @@
-const { default: makeWASocket, useSingleFileAuthState } = require('@whiskeysockets/baileys')
-const { join } = require('path')
-const fs = require('fs')
+const { default: makeWASocket, useSingleFileAuthState, DisconnectReason } = require('@adiwajshing/baileys')
+const { Boom } = require('@hapi/boom')
+const P = require('pino')
 
 const { state, saveState } = useSingleFileAuthState('./auth.json')
 
-async function startSock() {
+async function startBot() {
     const sock = makeWASocket({
         auth: state,
         printQRInTerminal: true,
+        logger: P({ level: 'silent' })
+    })
+
+    sock.ev.on('connection.update', (update) => {
+        const { connection, lastDisconnect } = update
+        if (connection === 'close') {
+            const shouldReconnect = (lastDisconnect.error = Boom)?.output?.statusCode !== DisconnectReason.loggedOut
+            console.log('connection closed due to ', lastDisconnect.error, ', reconnecting ', shouldReconnect)
+            if (shouldReconnect) {
+                startBot()
+            }
+        } else if (connection === 'open') {
+            console.log('✅ Connected to WhatsApp!")
+        }
     })
 
     sock.ev.on('creds.update', saveState)
 
-    sock.ev.on('messages.upsert', async ({ messages }) => {
+    // مثال على الرد التلقائي
+    sock.ev.on('messages.upsert', async ({ messages, type }) => {
         const msg = messages[0]
-        if (!msg.message) return
+        if (!msg.message || msg.key.fromMe) return
 
-        const text = msg.message.conversation || msg.message.extendedTextMessage?.text
+        const from = msg.key.remoteJid
+        const message = msg.message.conversation || msg.message.extendedTextMessage?.text
 
-        if (text?.toLowerCase() === 'hi') {
-            await sock.sendMessage(msg.key.remoteJid, { text: 'Hello! 🤖' })
-        } else if (text?.toLowerCase() === 'ping') {
-            await sock.sendMessage(msg.key.remoteJid, { text: 'Pong 🏓' })
+        if (message === 'ping') {
+            await sock.sendMessage(from, { text: 'pong 🏓' })
         }
     })
 }
 
-startSock()
+startBot()
